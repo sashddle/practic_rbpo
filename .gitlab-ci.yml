@@ -1,14 +1,25 @@
-orkflow:
+workflow:
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
 
 stages:
   - build
   - test
 
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+cache:
+  paths:
+    - .m2/repository
+
 build-job:
   stage: build
   image: eclipse-temurin:21-jdk
+  script:
+    - chmod +x mvnw
+    - ./mvnw $MAVEN_CLI_OPTS clean compile test package
   artifacts:
     paths:
       - target/*.jar
@@ -20,10 +31,8 @@ sast-semgrep:
   tags:
     - linux
     - bas2301
-  variables:
-    SEMGREP_RULES: p/security-audit p/secrets p/ci
   script:
-    - semgrep scan --sarif --output report.sarif
+    - semgrep ci --config auto --sarif --output report.sarif
   artifacts:
     reports:
       sast: report.sarif
