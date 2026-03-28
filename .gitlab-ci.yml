@@ -17,6 +17,9 @@ cache:
 build-job:
   stage: build
   image: eclipse-temurin:21-jdk
+  tags:
+    - linux
+    - bas2301
   script:
     - chmod +x mvnw
     - ./mvnw $MAVEN_CLI_OPTS clean compile test package
@@ -44,12 +47,12 @@ sast-semgrep:
 sca-dependency-check:
   stage: test
   image: maven:3.9-eclipse-temurin-21
-  script:
-    - chmod +x mvnw
-    - ./mvnw dependency-check:check -DskipTests
   tags:
     - linux
     - bas2301
+  script:
+    - chmod +x mvnw
+    - ./mvnw dependency-check:check -DskipTests
   artifacts:
     paths:
       - target/dependency-check-report.html
