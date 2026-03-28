@@ -61,3 +61,45 @@ sca-dependency-check:
       - target/dependency-check-report.json
     expire_in: 1 week
   allow_failure: true
+
+dast-zap-baseline:
+  stage: test
+  image:
+    name: zaproxy/zap-stable
+    entrypoint: [""]
+  tags:
+    - linux
+    - bas2301
+  needs: ["build-job"]
+  script:
+    - apt-get update && apt-get install -y openjdk-21-jre
+    - java -jar target/*.jar &
+    - sleep 30
+    - zap-baseline.py -t http://localhost:8080 -r zap-baseline-report.html || true
+  artifacts:
+    when: always
+    paths:
+      - zap-baseline-report.html
+    expire_in: 1 week
+  allow_failure: true
+
+dast-zap-api:
+  stage: test
+  image:
+    name: zaproxy/zap-stable
+    entrypoint: [""]
+  tags:
+    - linux
+    - bas2301
+  needs: ["build-job"]
+  script:
+    - apt-get update && apt-get install -y openjdk-21-jre
+    - java -jar target/*.jar &
+    - sleep 30
+    - zap-api-scan.py -t http://localhost:8080 -r zap-api-report.html || true
+  artifacts:
+    when: always
+    paths:
+      - zap-api-report.html
+    expire_in: 1 week
+  allow_failure: true
