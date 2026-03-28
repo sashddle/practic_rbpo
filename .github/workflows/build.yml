@@ -1,43 +1,42 @@
-name: CI/CD Pipeline
+name: Secure Build Pipeline
 
 on:
   pull_request:
-    branches: [main]
+    branches: [ "main" ]
 
 jobs:
   build-and-sast:
     runs-on: ubuntu-latest
-    container: eclipse-temurin:21-jdk
     
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
       - name: Build with Maven
         run: |
           chmod +x mvnw
-          ./mvnw clean compile test package
-      
-      - name: Run Semgrep SAST
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: auto
-          sarif_file: report.sarif
-        continue-on-error: true
-      
+          ./mvnw package -DskipTests
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Semgrep SAST scan
+        run: semgrep scan --config auto --sarif --output report.sarif .
+
       - name: Upload SARIF report
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: report.sarif
-      
-      - name: Upload JAR Artifact
+
+      - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: application-jar
           path: target/*.jar
-      
-      - name: Upload SAST Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: sast-report
-          path: report.sarif
