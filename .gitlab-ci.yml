@@ -28,8 +28,11 @@ build-job:
 sast-semgrep:
   stage: test
   image: returntocorp/semgrep
+  tags:
+    - linux
+    - bas2301
   script:
-    - semgrep ci --config auto --sarif --output report.sarif .
+    - semgrep ci --config auto --sarif --output report.sarif
   artifacts:
     reports:
       sast: report.sarif
@@ -44,6 +47,9 @@ sca-dependency-check:
   script:
     - chmod +x mvnw
     - ./mvnw dependency-check:check -DskipTests
+  tags:
+    - linux
+    - bas2301
   artifacts:
     paths:
       - target/dependency-check-report.html
