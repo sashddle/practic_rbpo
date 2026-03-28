@@ -6,10 +6,27 @@ workflow:
     - build
     - test
 
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+cache:
+  paths:
+    - .m2/repository
+
 build-job:
   stage: build
   image: eclipse-temurin:21-jdk
+<<<<<<< HEAD
     - target/*.jar
+=======
+  script:
+    - chmod +x mvnw
+    - ./mvnw $MAVEN_CLI_OPTS clean compile test package
+  artifacts:
+    paths:
+      - target/*.jar
+>>>>>>> e9e8bdeb8b0d369cccd8d2c92b138a1d803fb3bb
     expire_in: 1 week
 
 sast-semgrep:
@@ -18,6 +35,11 @@ sast-semgrep:
   tags:
     - linux
     - bas2301
+<<<<<<< HEAD
+=======
+  script:
+    - semgrep ci --config auto --sarif --output report.sarif
+>>>>>>> e9e8bdeb8b0d369cccd8d2c92b138a1d803fb3bb
   artifacts:
     reports:
       sast: report.sarif
