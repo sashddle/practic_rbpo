@@ -29,7 +29,8 @@ sast-semgrep:
   stage: test
   image: returntocorp/semgrep
   tags:
-    - saas-linux-small-amd64
+    - linux
+    - bas2301
   script:
     - semgrep ci --config auto --sarif --output report.sarif
   artifacts:
