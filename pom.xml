@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.4</version> <!-- ИСПРАВЛЕНО: корректная версия -->
+        <version>3.4.4</version> 
         <relativePath/>
     </parent>
 
@@ -47,7 +47,7 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ИСПРАВЛЕНО: актуальная версия dom4j -->
+
         <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
@@ -96,7 +96,6 @@
                 </configuration>
             </plugin>
 
-            <!-- ПЛАГИН ДЛЯ ЛАБЫ №4 (SCA) -->
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
