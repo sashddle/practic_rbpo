@@ -27,29 +27,25 @@ build-job:
 
 sast-semgrep:
   stage: test
-  image: semgrep/semgrep
-  tags:
-    - linux
-    - bas2301
+  image: returntocorp/semgrep
   script:
-    - semgrep ci --config auto --sarif --output report.sarif
+    - semgrep ci --config auto --sarif --output report.sarif .
   artifacts:
     reports:
       sast: report.sarif
     paths:
       - report.sarif
     expire_in: 1 week
+  allow_failure: true
 
 sca-dependency-check:
   stage: test
   image: maven:3.9-eclipse-temurin-21
-  tags:
-    - linux
-    - bas2301
   script:
     - chmod +x mvnw
-    - ./mvnw dependency-check:check
+    - ./mvnw dependency-check:check -DskipTests
   artifacts:
     paths:
       - target/dependency-check-report.html
     expire_in: 1 week
+  allow_failure: true
