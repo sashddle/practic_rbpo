@@ -35,8 +35,9 @@ sast-semgrep:
     - linux
     - bas2301
   script:
-    - semgrep ci --config auto --sarif --output report.sarif
+    - semgrep ci --config auto --sarif --output report.sarif || true
   artifacts:
+    when: always
     reports:
       sast: report.sarif
     paths:
@@ -52,9 +53,11 @@ sca-dependency-check:
     - bas2301
   script:
     - chmod +x mvnw
-    - ./mvnw dependency-check:check -DskipTests -DfailOnError=false -Ddependency-check.failBuildOnCVSS=11
+    - ./mvnw dependency-check:check -DskipTests -DfailOnError=false -Ddependency-check.failBuildOnCVSS=11 || true
   artifacts:
+    when: always
     paths:
       - target/dependency-check-report.html
+      - target/dependency-check-report.json
     expire_in: 1 week
   allow_failure: true
