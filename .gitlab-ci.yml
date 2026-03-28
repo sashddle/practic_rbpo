@@ -2,17 +2,9 @@ workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
 
-  stages:
-    - build
-    - test
-
-variables:
-  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
-  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
-
-cache:
-  paths:
-    - .m2/repository
+stages:
+  - build
+  - test
 
 variables:
   MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
@@ -25,19 +17,12 @@ cache:
 build-job:
   stage: build
   image: eclipse-temurin:21-jdk
-<<<<<<< HEAD
-<<<<<<< HEAD
-    - target/*.jar
-=======
-=======
->>>>>>> 6bcd27b6cf079b3e77519594a9f63d36870ada6a
   script:
     - chmod +x mvnw
     - ./mvnw $MAVEN_CLI_OPTS clean compile test package
   artifacts:
     paths:
       - target/*.jar
->>>>>>> e9e8bdeb8b0d369cccd8d2c92b138a1d803fb3bb
     expire_in: 1 week
 
 sast-semgrep:
@@ -46,22 +31,14 @@ sast-semgrep:
   tags:
     - linux
     - bas2301
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
   script:
     - semgrep ci --config auto --sarif --output report.sarif
->>>>>>> e9e8bdeb8b0d369cccd8d2c92b138a1d803fb3bb
-=======
-  script:
-    - semgrep ci --config auto --sarif --output report.sarif
->>>>>>> 6bcd27b6cf079b3e77519594a9f63d36870ada6a
   artifacts:
     reports:
       sast: report.sarif
     paths:
       - report.sarif
-<<<<<<< HEAD
+    expire_in: 1 week
 
 sca-dependency-check:
   stage: test
@@ -74,6 +51,5 @@ sca-dependency-check:
     - ./mvnw dependency-check:check
   artifacts:
     paths:
-=======
+      - target/dependency-check-report.html
     expire_in: 1 week
->>>>>>> 6bcd27b6cf079b3e77519594a9f63d36870ada6a
