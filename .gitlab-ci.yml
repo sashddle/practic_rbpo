@@ -14,12 +14,23 @@ cache:
   paths:
     - .m2/repository
 
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+cache:
+  paths:
+    - .m2/repository
+
 build-job:
   stage: build
   image: eclipse-temurin:21-jdk
 <<<<<<< HEAD
+<<<<<<< HEAD
     - target/*.jar
 =======
+=======
+>>>>>>> 6bcd27b6cf079b3e77519594a9f63d36870ada6a
   script:
     - chmod +x mvnw
     - ./mvnw $MAVEN_CLI_OPTS clean compile test package
@@ -36,15 +47,21 @@ sast-semgrep:
     - linux
     - bas2301
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   script:
     - semgrep ci --config auto --sarif --output report.sarif
 >>>>>>> e9e8bdeb8b0d369cccd8d2c92b138a1d803fb3bb
+=======
+  script:
+    - semgrep ci --config auto --sarif --output report.sarif
+>>>>>>> 6bcd27b6cf079b3e77519594a9f63d36870ada6a
   artifacts:
     reports:
       sast: report.sarif
     paths:
       - report.sarif
+<<<<<<< HEAD
 
 sca-dependency-check:
   stage: test
@@ -57,3 +74,6 @@ sca-dependency-check:
     - ./mvnw dependency-check:check
   artifacts:
     paths:
+=======
+    expire_in: 1 week
+>>>>>>> 6bcd27b6cf079b3e77519594a9f63d36870ada6a
