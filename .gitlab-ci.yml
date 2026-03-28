@@ -12,10 +12,9 @@ build-job:
     - target/*.jar
     expire_in: 1 week
 
-# SAST (пз 3)
 sast-semgrep:
   stage: test
-  image: semgrep/semgrep  # Используем обновленный образ
+  image: semgrep/semgrep
   tags:
     - linux
     - bas2301
@@ -24,7 +23,7 @@ sast-semgrep:
       sast: report.sarif
     paths:
       - report.sarif
-# SCA (пз 4)
+
 sca-dependency-check:
   stage: test
   image: maven:3.9-eclipse-temurin-21
