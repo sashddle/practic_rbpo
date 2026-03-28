@@ -1,32 +1,38 @@
-orkflow:
+workflow:
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
 
-stages:
-  - build
-  - test
+  stages:
+    - build
+    - test
 
 build-job:
   stage: build
   image: eclipse-temurin:21-jdk
-  artifacts:
-    paths:
-      - target/*.jar
+    - target/*.jar
     expire_in: 1 week
 
+# SAST (пз 3)
 sast-semgrep:
   stage: test
-  image: returntocorp/semgrep
+  image: semgrep/semgrep  # Используем обновленный образ
   tags:
     - linux
     - bas2301
-  variables:
-    SEMGREP_RULES: p/security-audit p/secrets p/ci
-  script:
-    - semgrep scan --sarif --output report.sarif
   artifacts:
     reports:
       sast: report.sarif
     paths:
       - report.sarif
-    expire_in: 1 week
+# SCA (пз 4)
+sca-dependency-check:
+  stage: test
+  image: maven:3.9-eclipse-temurin-21
+  tags:
+    - linux
+    - bas2301
+  script:
+    - chmod +x mvnw
+    - ./mvnw dependency-check:check
+  artifacts:
+    paths:
