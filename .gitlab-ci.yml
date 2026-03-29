@@ -1,0 +1,105 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"
+
+stages:
+  - build
+  - test
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+cache:
+  paths:
+    - .m2/repository
+
+build-job:
+  stage: build
+  image: eclipse-temurin:21-jdk
+  tags:
+    - linux
+    - bas2301
+  script:
+    - chmod +x mvnw
+    - ./mvnw $MAVEN_CLI_OPTS clean compile test package
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1 week
+
+sast-semgrep:
+  stage: test
+  image: returntocorp/semgrep
+  tags:
+    - linux
+    - bas2301
+  script:
+    - semgrep ci --config auto --sarif --output report.sarif || true
+  artifacts:
+    when: always
+    reports:
+      sast: report.sarif
+    paths:
+      - report.sarif
+    expire_in: 1 week
+  allow_failure: true
+
+sca-dependency-check:
+  stage: test
+  image: maven:3.9-eclipse-temurin-21
+  tags:
+    - linux
+    - bas2301
+  script:
+    - chmod +x mvnw
+    - ./mvnw dependency-check:check -DskipTests -DfailOnError=false -Ddependency-check.failBuildOnCVSS=11 || true
+  artifacts:
+    when: always
+    paths:
+      - target/dependency-check-report.html
+      - target/dependency-check-report.json
+    expire_in: 1 week
+  allow_failure: true
+
+dast-zap-baseline:
+  stage: test
+  image:
+    name: zaproxy/zap-stable
+    entrypoint: [""]
+  tags:
+    - linux
+    - bas2301
+  needs: ["build-job"]
+  script:
+    - apt-get update && apt-get install -y openjdk-21-jre
+    - java -jar target/*.jar &
+    - sleep 30
+    - zap-baseline.py -t http://localhost:8080 -r zap-baseline-report.html || true
+  artifacts:
+    when: always
+    paths:
+      - zap-baseline-report.html
+    expire_in: 1 week
+  allow_failure: true
+
+dast-zap-api:
+  stage: test
+  image:
+    name: zaproxy/zap-stable
+    entrypoint: [""]
+  tags:
+    - linux
+    - bas2301
+  needs: ["build-job"]
+  script:
+    - apt-get update && apt-get install -y openjdk-21-jre
+    - java -jar target/*.jar &
+    - sleep 30
+    - zap-api-scan.py -t http://localhost:8080 -r zap-api-report.html || true
+  artifacts:
+    when: always
+    paths:
+      - zap-api-report.html
+    expire_in: 1 week
+  allow_failure: true

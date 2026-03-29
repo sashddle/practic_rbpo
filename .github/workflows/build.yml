@@ -1,0 +1,42 @@
+name: Secure Build Pipeline
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-sast:
+    runs-on: ubuntu-latest
+    
+    steps:
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        run: |
+          chmod +x mvnw
+          ./mvnw package -DskipTests
+
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Semgrep SAST scan
+        run: semgrep scan --config auto --sarif --output report.sarif .
+
+      - name: Upload SARIF report
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: report.sarif
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: application-jar
+          path: target/*.jar
